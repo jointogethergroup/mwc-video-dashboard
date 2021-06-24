@@ -131,19 +131,76 @@ class App extends Component {
   onFilter = () => {
 
   }
+  
 
-  render() {    
+  onSetAnwserHandler = (event) => {
+    switch (event.target.name) {
+        case "session-track":
+            this.setState({ filter_track: event.target.value !== "" ? event.target.value : null })
+            break;
+
+        case "session-room":
+            this.setState({ filter_room: event.target.value !== "" ? event.target.value : null })
+            break;
+
+        case "session-day":
+            this.setState({ filter_day: event.target.value !== "" ? event.target.value : null })
+            break;
+
+        case "session-from-time":
+            this.setState({ filter_date_from: event.target.value !== "" ? event.target.value : null })
+            break;
+
+        case "session-to-time":
+            this.setState({ filter_date_to: event.target.value !== "" ? event.target.value : null })
+            break;
+
+        case "max-videos":
+            this.setState({ max: event.target.value !== "" ? event.target.value : null })
+            break;
+
+        case "size-video":
+            this.setState({ size: event.target.value !== "" ? event.target.value : null })
+            break;
+        default:
+            break;
+    }
+
+}
+
+onCommentsHandler = (text) => {  
+  this.setState({ filter_title: text });
+}
+
+render() {    
 
     const uniqueTracks = [... new Set(this.state.sessions.map(data => data.type))]
     const uniqueDays = [... new Set(this.state.sessions.map(data => data.day))]
     const uniqueRooms = [... new Set(this.state.sessions.map(data => data.room))]
 
-    const tracks = uniqueTracks.map((el, index) => <option value={el}>{el}</option>)
-    const days = uniqueDays.map((el, index) => <option value={el}>{el}</option>)
-    const rooms = uniqueRooms.map((el, index) => <option value={el}>{el}</option>)
+    const tracks = uniqueTracks.map((el, index) => <option key={el} value={el}>{el}</option>)
+    const days = uniqueDays.map((el, index) => <option key={el} value={el}>{el}</option>)
+    const rooms = uniqueRooms.map((el, index) => <option key={el} value={el}>{el}</option>)
 
+    console.log(this.state.filter_track)
 
-    const videos =  this.state.sessions.filter(el=>el.vimeo_key!==undefined).slice(0, this.state.max).map((el, index) => {
+    const videos =  this.state.sessions
+      .filter(el=>el.vimeo_key!==undefined)
+      .filter(el=>el.title.toUpperCase().includes(this.state.filter_title.toUpperCase()) || this.state.filter_title === "" || this.state.filter_title === null || this.state.filter_title === undefined)
+      .filter(el=>el.type === this.state.filter_track || this.state.filter_track === null || this.state.filter_track === undefined || this.state.filter_track === "")
+      .filter(el=>el.day === this.state.filter_day || this.state.filter_day === null || this.state.filter_day === undefined || this.state.filter_day === "")
+      .filter(el=>el.room === this.state.filter_room || this.state.filter_room === null || this.state.filter_room === undefined || this.state.filter_room === "")
+      .filter((el, index) => {
+        const start = el.time_start.replace(/T/g, ' ').replace(/Z/g, '')  
+        const start_date =  new Date(start);
+        const start_hour = start_date.getHours() 
+        return (
+          (start_hour >= this.state.filter_date_from || this.state.filter_date_from === null || this.state.filter_date_from === "" || this.state.filter_date_from === undefined) &&
+          (start_hour <= this.state.filter_date_to || this.state.filter_date_to === null || this.state.filter_date_to === "" || this.state.filter_date_to === undefined) 
+        )
+      })
+      .slice(0, this.state.max)
+      .map((el, index) => {
       return(
         <Video kye={el.id} type={el.type} 
                 title={el.title}
@@ -179,26 +236,29 @@ class App extends Component {
 
                           <div className="input-container">
                               <label htmlFor="Session">Session</label>
-                              <input type="text" id="Session" name="Session" value="" />
+                              <input type="text" id="session-title" name="session-title" onChange={(event) => this.onCommentsHandler(event.target.value)} />
                           </div>
 
                           <div className="input-container">
                               <label htmlFor="Track">Tracks</label>
-                                <select name="Track" id="Track">
+                                <select name="session-track" id="session-track" onChange={(event) => this.onSetAnwserHandler(event)}>
+                                  <option value=""></option>
                                   {tracks}
                                 </select>
                           </div>
 
                           <div className="input-container">
                               <label htmlFor="Day">Day</label>
-                                <select name="Day" id="Day">
+                                <select name="session-day" id="session-day" onChange={(event) => this.onSetAnwserHandler(event)}>
+                                  <option value=""></option>
                                   {days}
                                 </select>
                           </div>
 
                           <div className="input-container">
                               <label htmlFor="Room">Room</label>
-                                <select name="Room" id="Room">
+                                <select name="session-room" id="session-room" onChange={(event) => this.onSetAnwserHandler(event)}>
+                                  <option value=""></option>
                                   {rooms}
                                 </select>
                           </div>
@@ -206,8 +266,9 @@ class App extends Component {
                           <div className="input-container">
                             <div className="time-form-wrapper-input">
                                 <div className="input-container-time">
-                                    <label htmlFor="from-time">From</label>
-                                    <select name="from-time" id="from-time">
+                                    <label htmlFor="session-from-time">From</label>
+                                    <select name="session-from-time" id="session-from-time" onChange={(event) => this.onSetAnwserHandler(event)}>
+                                      <option value=""></option>
                                       <option value="7">07:00</option>
                                       <option value="8">08:00</option>
                                       <option value="9">09:00</option>
@@ -225,9 +286,9 @@ class App extends Component {
                                     </select>
                                 </div>
                                 <div className="input-container-time">
-                                    <label htmlFor="to-time">To</label>
-                                    <select name="to-time" id="to-time">
-                                    <option value="7">07:00</option>
+                                    <label htmlFor="session-to-time">To</label>
+                                    <select name="session-to-time" id="session-to-time" onChange={(event) => this.onSetAnwserHandler(event)}>
+                                      <option value=""></option>
                                       <option value="8">08:00</option>
                                       <option value="9">09:00</option>
                                       <option value="10">10:00</option>
@@ -249,8 +310,8 @@ class App extends Component {
                           <div className="input-container">
                             <div className="time-form-wrapper-input">
                                 <div className="input-container-time">
-                                    <label htmlFor="from-time">Max</label>
-                                    <select name="from-time" id="from-time">
+                                    <label htmlFor="max-videos">Max</label>
+                                    <select name="max-videos" id="max-videos" onChange={(event) => this.onSetAnwserHandler(event)}>
                                       <option value="5">5</option>
                                       <option value="10" selected>10</option>
                                       <option value="15">15</option>
@@ -260,8 +321,8 @@ class App extends Component {
                                     </select>
                                 </div>
                                 <div className="input-container-time">
-                                    <label htmlFor="to-time">Size</label>
-                                    <select name="to-time" id="to-time">
+                                    <label htmlFor="size-video">Size</label>
+                                    <select name="size-video" id="size-video" onChange={(event) => this.onSetAnwserHandler(event)}>
                                     <option value="XS">XS</option>
                                       <option value="S">S</option>
                                       <option value="M" selected>M</option>

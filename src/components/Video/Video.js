@@ -4,24 +4,36 @@ function Video(props) {
 
     let url_array;
     let url = props.vimeo_url;
-
+    let isLiveRecurring = false; 
+    
+    // suport to recurring live event -> é preciso transformar o URL directo para o URL de embed
     if (props.vimeo_url !== undefined && props.vimeo_url !== "") {
         url_array = props.vimeo_url.split("/");
         for (let index = 0; index < url_array.length; index++) {
             const element = url_array[index];
             if (element === "event"){
                 url = url_array[0] + '//' + url_array[2] + '/' + url_array[3] + '/' + url_array[4] + '/embed/' + url_array[5] 
+                isLiveRecurring = true;
                 break;
             }       
         }
     }
 
+    // support para videos on-demand, para poderem tocar em consecutivo 
+    if (!isLiveRecurring){
+        if (props.vimeo_url !== undefined && props.vimeo_url !== "") {
+            url = props.vimeo_url + '?autopause=0';
+        }
+    }
+    
+
+
     return (
         <div className="content-mwc-videos-container">
             <div className="session-details">
-                <strong>{props.type}</strong><br />
+                {props.type}<br />
                 <strong>{props.title}</strong><br />
-                <strong>Start:</strong> {props.time_start} | {props.time_end}<br />
+                {props.time_start} | {props.time_end}<br />
                 <strong>Room:</strong> {props.room}<br />
                 <strong>URL:</strong> <a href={props.vimeo_url} target="blank">{props.vimeo_url}</a><br/>
                 <strong>Embed:</strong> {url}<br />
