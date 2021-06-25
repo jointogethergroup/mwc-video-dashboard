@@ -25,7 +25,6 @@ function VideoUpload(props) {
                                 <input type="file" id="myFile" name="filename" />
                                 <input className="btn-submit" type="submit" />
                             </form>
-
                         </div>
                     </div>
 

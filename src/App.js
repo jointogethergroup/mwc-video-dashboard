@@ -38,6 +38,8 @@ class App extends Component {
         this.context.authenticated = true;
         this.context.email = decoded.payload.email;
         this.context.event_id = decoded.payload.event_id;
+
+        this.loadSession();
     }
   }
 
@@ -71,6 +73,9 @@ class App extends Component {
             this.context.event_id = decoded.payload.event_id;
             
             this.setState({loggedIn:true})
+
+            this.loadSession();
+
 
         }).catch(error => {
               const errorCode = error.response !== undefined && error.response.data !== undefined && error.response.data !== "" ? error.response.data : "100";
@@ -166,11 +171,11 @@ class App extends Component {
             break;
     }
 
-}
+  }
 
-onCommentsHandler = (text) => {  
+  onCommentsHandler = (text) => {  
   this.setState({ filter_title: text });
-}
+  }
 
 render() {    
 
@@ -181,9 +186,6 @@ render() {
     const tracks = uniqueTracks.map((el, index) => <option key={el} value={el}>{el}</option>)
     const days = uniqueDays.map((el, index) => <option key={el} value={el}>{el}</option>)
     const rooms = uniqueRooms.map((el, index) => <option key={el} value={el}>{el}</option>)
-
-    console.log(this.state.filter_track)
-
     const videos =  this.state.sessions
       .filter(el=>el.vimeo_key!==undefined)
       .filter(el=>el.title.toUpperCase().includes(this.state.filter_title.toUpperCase()) || this.state.filter_title === "" || this.state.filter_title === null || this.state.filter_title === undefined)
@@ -202,14 +204,16 @@ render() {
       .slice(0, this.state.max)
       .map((el, index) => {
       return(
-        <Video kye={el.id} type={el.type} 
-                title={el.title}
-                time_start={el.time_start}
-                time_end={el.time_end}
-                room={el.room}
-                vimeo_id={el.vimeo_id}
-                vimeo_url={el.vimeo_url}
-                vimeo_key={el.vimeo_key}
+        <Video key={el.id} 
+              id={el.id}
+              type={el.type} 
+              title={el.title}
+              time_start={el.time_start}
+              time_end={el.time_end}
+              room={el.room}
+              vimeo_id={el.vimeo_id}
+              vimeo_url={el.vimeo_url}
+              vimeo_key={el.vimeo_key}
         />
       )
     });
@@ -331,10 +335,6 @@ render() {
                                     </select>
                                 </div>
                             </div>
-                          </div>
-
-                          <div className="input-container-submit">
-                              <div className="content-mwc-videos-btns upload" onClick={this.loadSession}>Filter</div>
                           </div>
 
                       </form>

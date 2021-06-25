@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "mwc-video-dashboard"
+    "default": "mwc-video-dashboard",
+    "mwc-dashboard": "mwc-dashboard"
   }
 }
