@@ -8,7 +8,7 @@ function VideoUpload(props) {
                 <div className="modal-mwc-videos-sessions-container upload">
 
                     <div className="modal-mwc-videos-session-header">
-
+                        <div class="modal-mwc-close-btn" onClick={props.close}>Close</div>
                         <div className="modal-mwc-videos-session-header-wrapper">
                             <strong>Session Title</strong><br />
                             <strong>Date:</strong> 23-06-2021<br />

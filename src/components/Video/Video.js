@@ -1,31 +1,9 @@
 import React, { Component } from 'react';
-import VideoList from '../VideoList/VideoList'
-import VideoUpload from '../VideoUpload/VideoUpload'
 
 class Video extends Component {
     
-    state = {        
-        videosOpen:false,
-        uploadOpen:false
-    }    
+    state = {}    
 
-    showVideos  = () =>{
-        this.setState((prevState, props) => {
-            return {
-                videosOpen: !prevState.videosOpen
-            };
-        })
-    }
-        
-    uploadVideo  = () =>{
-        this.setState((prevState, props) => {
-            return {
-                uploadOpen: !prevState.uploadOpen
-            };
-        })
-    }
-
-    
     render() {
 
         let url_array;
@@ -53,30 +31,6 @@ class Video extends Component {
             }
         }
 
-        const videoList = this.state.videosOpen 
-            ? <VideoList id={this.props.id}
-                        type={this.props.type}
-                        title={this.props.title}
-                        date_from={this.props.time_start} 
-                        date_to={this.props.time_end}
-                        room={this.props.room}
-                        vimeo_id={this.props.vimeo_id}
-                        url={this.props.vimeo_url} 
-                        />
-            : null;
-
-        const videoUpload = this.state.uploadOpen 
-            ? <VideoUpload id={this.props.id}
-                        type={this.props.type}
-                        title={this.props.title}
-                        date_from={this.props.time_start} 
-                        date_to={this.props.time_end}
-                        room={this.props.room}
-                        vimeo_id={this.props.vimeo_id}
-                        url={this.props.vimeo_url} 
-                        />
-            : null;
-
         return (
             <React.Fragment>
                 <div className="content-mwc-videos-container">
@@ -96,12 +50,10 @@ class Video extends Component {
                         : null }
                     </div>
                     <div className="content-mwc-videos-btns-wrapper">
-                        <div className="content-mwc-videos-btns videos" onClick={this.showVideos}>Videos</div>
-                        <div className="content-mwc-videos-btns upload" onClick={this.uploadVideo}>Upload</div>
+                        <div className="content-mwc-videos-btns videos" onClick={() => this.props.showVideos(this.props.id)}>Videos</div>
+                        <div className="content-mwc-videos-btns upload" onClick={() => this.props.uploadVideo(this.props.id)}>Upload</div>
                     </div>
                 </div>
-                {videoList}
-                {videoUpload}   
             </React.Fragment>
         );
     }

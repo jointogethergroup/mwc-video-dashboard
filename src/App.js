@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import './App.css';
 import Video from './components/Video/Video'
+import VideoList from './components/VideoList/VideoList'
+import VideoUpload from './components/VideoUpload/VideoUpload'
 import AuthContext from './auht-context'
 import axios from 'axios';
 import jwt from 'jsonwebtoken'
@@ -25,7 +27,10 @@ class App extends Component {
     filter_date_to:"",
     max:10,
     size:'M',
-    sessions:[]
+    sessions:[],
+    sessionSelected:{},
+    videosOpen:false,
+    uploadOpen:false
   }
 
   componentDidMount(){
@@ -115,18 +120,10 @@ class App extends Component {
         headers: {
             "x-auth-token": this.context.token,
             "content-type": "application/json",
-        },
-        params: {
-          title:this.state.filter_title,
-          track:this.state.filter_track,
-          room:this.state.filter_room,
-          day:this.state.filter_day,
-          date_from:this.state.filter_date_from,
-          date_to:this.state.filter_date_to
         }
     };
 
-    axios.get("https://virtual-venue-api-staging.herokuapp.com/api/sessions/", data)    // get the details of the user
+    axios.get("https://virtual-venue-api-staging.herokuapp.com/api/sessions/me/dashboard/", data)    // get the details of the user
         .then(response => {
             this.setState({sessions:response.data})
         })
@@ -177,7 +174,47 @@ class App extends Component {
   this.setState({ filter_title: text });
   }
 
-render() {    
+  showVideos  = (sessionId) =>{
+    const selectSession = this.state.sessions.filter((el) => el.id === sessionId )
+    const selectSessionObj = selectSession !== undefined && selectSession.length>0 ? selectSession[0] : null;
+    if (selectSessionObj){
+      this.setState((prevState, props) => {
+        return {
+            videosOpen: !prevState.videosOpen,
+            sessionSelected: selectSessionObj
+        };
+      })
+    } else {
+      this.setState((prevState, props) => {
+        return {
+            videosOpen: !prevState.videosOpen,
+            sessionSelected: null  
+        };
+      })
+    }
+  }
+    
+  uploadVideo  = (sessionId) =>{
+    const selectSession = this.state.sessions.filter((el) => el.id === sessionId )
+    const selectSessionObj = selectSession !== undefined && selectSession.length>0 ? selectSession[0] : null;
+    if (selectSessionObj){
+      this.setState((prevState, props) => {
+        return {
+            uploadOpen: !prevState.uploadOpen,
+            sessionSelected: selectSessionObj
+        };
+      })
+    } else {
+      this.setState((prevState, props) => {
+        return {
+            uploadOpen: !prevState.uploadOpen,
+            sessionSelected: null  
+        };
+      })
+    }
+  }
+
+  render() {    
 
     const uniqueTracks = [... new Set(this.state.sessions.map(data => data.type))]
     const uniqueDays = [... new Set(this.state.sessions.map(data => data.day))]
@@ -214,11 +251,40 @@ render() {
               vimeo_id={el.vimeo_id}
               vimeo_url={el.vimeo_url}
               vimeo_key={el.vimeo_key}
+              showVideos={this.showVideos}
+              uploadVideo={this.uploadVideo}
         />
       )
     });
 
+    const videoList = this.state.videosOpen 
+      ? <VideoList id={this.state.sessionSelected.id}
+                  type={this.state.sessionSelected.type}
+                  title={this.state.sessionSelected.title}
+                  date_from={this.state.sessionSelected.time_start} 
+                  date_to={this.state.sessionSelected.time_end}
+                  room={this.state.sessionSelected.room}
+                  vimeo_id={this.state.sessionSelected.vimeo_id}
+                  url={this.state.sessionSelected.vimeo_url} 
+                  close={this.showVideos}
+                  />
+      : null;
+
+  const videoUpload = this.state.uploadOpen 
+      ? <VideoUpload id={this.state.sessionSelected.id}
+                  type={this.state.sessionSelected.type}
+                  title={this.state.sessionSelected.title}
+                  date_from={this.state.sessionSelected.time_start} 
+                  date_to={this.state.sessionSelected.time_end}
+                  room={this.state.sessionSelected.room}
+                  vimeo_id={this.state.sessionSelected.vimeo_id}
+                  url={this.state.sessionSelected.vimeo_url} 
+                  close={this.uploadVideo}
+                  />
+            : null;
+
     return  (
+      <React.Fragment>
       <div className="full-area-container">
 
           <div className="header-mwc">
@@ -346,6 +412,9 @@ render() {
                     {videos}
                   </div>
               </div>
+            
+              
+
             </React.Fragment>
             
             : 
@@ -381,9 +450,13 @@ render() {
 
           </div>
         </div>
+      {videoList}
+      {videoUpload}
+      </React.Fragment>
     ) 
 
-  }
+  } // render
+
 }
 
 export default App;

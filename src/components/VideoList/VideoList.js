@@ -54,6 +54,7 @@ class VideoList extends Component {
                     <div className="modal-mwc-videos-sessions-container">
 
                         <div className="modal-mwc-videos-session-header">
+                            <div class="modal-mwc-close-btn" onClick={this.props.close}>Close</div>
                             <div className="modal-mwc-videos-session-header-wrapper">
                                 {this.props.type}<br />
                                 <strong>{this.props.title}</strong><br />

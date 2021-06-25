@@ -304,3 +304,16 @@ background-color: #4d4d4d;
     color: white;
     cursor: pointer;
 }
+
+.modal-mwc-close-btn{
+    position:absolute;
+    right:5px;
+    top:5px;
+    padding:5px;
+    width:80px;
+    background-color:#ffffff;  
+    border:1px solid #030047;
+    color:#030047;
+    cursor:pointer;
+    text-align:center;
+}
