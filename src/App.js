@@ -120,10 +120,13 @@ class App extends Component {
         headers: {
             "x-auth-token": this.context.token,
             "content-type": "application/json",
+            "Authorization": "ft_poKlfheW4tfa2IKSFHi11hne28"
         }
     };
 
-    axios.get("https://virtual-venue-api-staging.herokuapp.com/api/sessions/me/dashboard/", data)    // get the details of the user
+    //axios.get("https://virtual-venue-api-staging.herokuapp.com/api/sessions/me/dashboard/", data)    // get the details of the user
+    axios.get("https://api.emma.events/v1/programme/json/", data)    // get the details of the user
+    
         .then(response => {
             this.setState({sessions:response.data})
         })
@@ -383,7 +386,7 @@ class App extends Component {
                                     <label htmlFor="max-videos">Max</label>
                                     <select name="max-videos" id="max-videos" onChange={(event) => this.onSetAnwserHandler(event)}>
                                       <option value="5">5</option>
-                                      <option value="10" selected>10</option>
+                                      <option value="10" defaultValue>10</option>
                                       <option value="15">15</option>
                                       <option value="20">20</option>
                                       <option value="30">30</option>
@@ -395,7 +398,7 @@ class App extends Component {
                                     <select name="size-video" id="size-video" onChange={(event) => this.onSetAnwserHandler(event)}>
                                     <option value="XS">XS</option>
                                       <option value="S">S</option>
-                                      <option value="M" selected>M</option>
+                                      <option value="M" defaultValue>M</option>
                                       <option value="L">L</option>
                                       <option value="XL">XL</option>
                                     </select>

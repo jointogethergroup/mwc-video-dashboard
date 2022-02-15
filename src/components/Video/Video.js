@@ -46,7 +46,7 @@ class Video extends Component {
                     </div>                        
                     <div className="content-mwc-videos-iframe-wrapper">
                         {url !== undefined && url !== "" ?
-                        <iframe src={url} width="100%" height="100%" frameBorder="0" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen></iframe>
+                        <iframe src={url} width="100%" height="100%" frameBorder="0" name={this.props.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen></iframe>
                         : null }
                     </div>
                     <div className="content-mwc-videos-btns-wrapper">

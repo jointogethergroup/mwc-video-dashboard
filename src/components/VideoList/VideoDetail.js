@@ -19,7 +19,7 @@ class VideoDetail extends Component {
             }
         };
         
-        console.log("https://virtual-venue-api-staging.herokuapp.com/api/vimeo/video/" + this.props.clip.clip_id + "/files")
+        //console.log("https://virtual-venue-api-staging.herokuapp.com/api/vimeo/video/" + this.props.clip.clip_id + "/files")
 
         axios.get("https://virtual-venue-api-staging.herokuapp.com/api/vimeo/video/" + this.props.clip.clip_id + "/files", data) 
         .then(response => {
