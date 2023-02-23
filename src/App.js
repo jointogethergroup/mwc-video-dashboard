@@ -18,7 +18,7 @@ class App extends Component {
     loggedIn: false,
     email:"",
     password:"",
-    event_id:"364",
+    event_id:"486",
     filter_title:"",
     filter_track:"",
     filter_room:"",
@@ -118,9 +118,8 @@ class App extends Component {
     
     let data = {
         headers: {
-            "x-auth-token": this.context.token,
             "content-type": "application/json",
-            "Authorization": "ft_poKlfheW4tfa2IKSFHi11hne28"
+            "Authorization": "ft_0pfl!fqmvyrirz2$wg9du@er"
         }
     };
 
