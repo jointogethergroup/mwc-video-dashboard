@@ -35,7 +35,7 @@ class Video extends Component {
             <React.Fragment>
                 <div className="content-mwc-videos-container">
                     <div className="session-details">
-                        {this.props.type}<br />
+                        {this.props.type} | {this.props.typology}<br />
                         <strong>{this.props.title}</strong><br />
                         {this.props.time_start} | {this.props.time_end}<br />
                         <strong>Room:</strong> {this.props.room}<br />

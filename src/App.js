@@ -21,6 +21,7 @@ class App extends Component {
     event_id:"486",
     filter_title:"",
     filter_track:"",
+    filter_typology:"non-physical",
     filter_room:"",
     filter_day:"",
     filter_date_from:"",
@@ -106,6 +107,7 @@ class App extends Component {
       password:"",      
       filter_title:"",
       filter_track:"",
+      filter_typology:"",
       filter_room:"",
       filter_day:"",
       filter_date_from:"",
@@ -143,7 +145,11 @@ class App extends Component {
             this.setState({ filter_track: event.target.value !== "" ? event.target.value : null })
             break;
 
-        case "session-room":
+          case "session-typology":
+              this.setState({ filter_typology: event.target.value !== "" ? event.target.value : null })
+              break;
+
+          case "session-room":
             this.setState({ filter_room: event.target.value !== "" ? event.target.value : null })
             break;
 
@@ -219,16 +225,25 @@ class App extends Component {
   render() {    
 
     const uniqueTracks = [... new Set(this.state.sessions.map(data => data.type))]
+    const uniqueTypology = [... new Set(this.state.sessions.map(data => data.typology))]
     const uniqueDays = [... new Set(this.state.sessions.map(data => data.day))]
     const uniqueRooms = [... new Set(this.state.sessions.map(data => data.room))]
 
     const tracks = uniqueTracks.map((el, index) => <option key={el} value={el}>{el}</option>)
+    const typologies = uniqueTypology.map((el, index) => <option key={el} value={el}>{el}</option>)
     const days = uniqueDays.map((el, index) => <option key={el} value={el}>{el}</option>)
     const rooms = uniqueRooms.map((el, index) => <option key={el} value={el}>{el}</option>)
     const videos =  this.state.sessions
       .filter(el=>el.vimeo_key!==undefined)
       .filter(el=>el.title.toUpperCase().includes(this.state.filter_title.toUpperCase()) || this.state.filter_title === "" || this.state.filter_title === null || this.state.filter_title === undefined)
       .filter(el=>el.type === this.state.filter_track || this.state.filter_track === null || this.state.filter_track === undefined || this.state.filter_track === "")
+      .filter(el=>el.typology === this.state.filter_typology 
+        || ( this.state.filter_typology === "non-physical" && el.typology === "Hybrid") 
+        || ( this.state.filter_typology === "non-physical" && el.typology === "Virtual") 
+        || this.state.filter_typology === null 
+        || this.state.filter_typology === undefined 
+        || this.state.filter_typology === ""
+        )
       .filter(el=>el.day === this.state.filter_day || this.state.filter_day === null || this.state.filter_day === undefined || this.state.filter_day === "")
       .filter(el=>el.room === this.state.filter_room || this.state.filter_room === null || this.state.filter_room === undefined || this.state.filter_room === "")
       .filter((el, index) => {
@@ -246,6 +261,7 @@ class App extends Component {
         <Video key={el.id} 
               id={el.id}
               type={el.type} 
+              typology={el.typology} 
               title={el.title}
               time_start={el.time_start}
               time_end={el.time_end}
@@ -316,6 +332,15 @@ class App extends Component {
                                 <select name="session-track" id="session-track" onChange={(event) => this.onSetAnwserHandler(event)}>
                                   <option value=""></option>
                                   {tracks}
+                                </select>
+                          </div>
+
+                          <div className="input-container">
+                              <label htmlFor="Track">Typology</label>
+                                <select name="session-typology" id="session-typology" onChange={(event) => this.onSetAnwserHandler(event)}>
+                                  <option value=""></option>
+                                  {typologies}
+                                  <option value="non-physical" selected>Hybrid & Virtual</option>
                                 </select>
                           </div>
 
