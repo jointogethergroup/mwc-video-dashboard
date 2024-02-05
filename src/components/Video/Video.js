@@ -12,7 +12,7 @@ class Video extends Component {
 
         
         // suport to recurring live event -> é preciso transformar o URL directo para o URL de embed
-        if (this.props.vimeo_url !== undefined && this.props.vimeo_url !== "") {
+        if (this.props.vimeo_url !== undefined && this.props.vimeo_url !== "" && this.props.vimeo_url !== null) {
             url_array = this.props.vimeo_url.split("/");
             for (let index = 0; index < url_array.length; index++) {
                 const element = url_array[index];
@@ -26,7 +26,7 @@ class Video extends Component {
 
         // support para videos on-demand, para poderem tocar em consecutivo 
         if (!isLiveRecurring){
-            if (this.props.vimeo_url !== undefined && this.props.vimeo_url !== "") {
+            if (this.props.vimeo_url !== undefined && this.props.vimeo_url !== "" && this.props.vimeo_url !== null) {
                 url = this.props.vimeo_url + '?autopause=0';
             }
         }

@@ -45,7 +45,7 @@ class App extends Component {
         this.context.email = decoded.payload.email;
         this.context.event_id = decoded.payload.event_id;
 
-        this.loadSession();
+        this.loadSession(1);
     }
   }
 
@@ -80,7 +80,7 @@ class App extends Component {
             
             this.setState({loggedIn:true})
 
-            this.loadSession();
+            this.loadSession(1);
 
 
         }).catch(error => {
@@ -116,20 +116,71 @@ class App extends Component {
     })
 }
 
-  loadSession = () => {
+  loadSession = (page) => {
     
-    let data = {
+    /* let data = {
         headers: {
             "content-type": "application/json",
             "Authorization": "ft_0pfl!fqmvyrirz2$wg9du@er"
         }
-    };
+    }; */
+
+    axios.defaults.headers['X-APP-AUTHENTICATE'] = 'D4If9P7muX7gFChbQSKe';
 
     //axios.get("https://virtual-venue-api-staging.herokuapp.com/api/sessions/me/dashboard/", data)    // get the details of the user
-    axios.get("https://api.emma.events/v1/programme/json/", data)    // get the details of the user
+    //axios.get("https://api.emma.events/v1/programme/json/", data)    // get the lis of programme SESSIONS  FACULTY EMMA
     
+    axios.get("https://dev-gsma-asm.jemexonline.com/api/sessions/mwcb24?page=" + page)    // get the lis of programme SESSIONS - JEMEX
         .then(response => {
-            this.setState({sessions:response.data})
+
+          let next_page = 0;
+
+          if (response.data){
+
+              
+
+              const meta_page = response.data.meta.page * 1;
+              const meta_count = response.data.meta.count * 1;
+              const meta_limit = response.data.meta.limit * 1;
+              const meta_total = response.data.meta.total * 1;
+
+              if (meta_page * meta_limit < meta_total){
+                next_page = meta_page + 1;
+              }
+
+
+              const scientific_program = [];
+              response.data.data.forEach(element => {
+                
+                const session_new = {
+                  "id": element.session_uuid,
+                  "title": element.title_en,
+                  "type": element.track_id,
+                  "typology": element.typology,
+                  "room_id": element.auditorium_id,
+                  "room": element.auditorium_id,
+                  "room_order": element.auditorium_id,
+                  "day_id": element.date,
+                  "day": element.date,
+                  "day_order": element.date,
+                  "time_start": new Date(element.start_at * 1000).toISOString(),
+                  "time_end": new Date(element.end_at * 1000).toISOString(),
+                  "vimeo_id": element.online_video_id,
+                  "vimeo_url": element.online_video_url,
+                  "vimeo_key": element.rtmp_url
+                }
+  
+                scientific_program.push(session_new);  
+
+              });
+              
+              this.setState({sessions: this.state.sessions.concat(scientific_program)})
+            }
+
+            if  (next_page > 0) {
+              this.loadSession(next_page);
+            }
+            
         })
         .catch(error => { console.log(error.message); })
   }
@@ -224,10 +275,10 @@ class App extends Component {
 
   render() {    
 
-    const uniqueTracks = [... new Set(this.state.sessions.map(data => data.type))]
-    const uniqueTypology = [... new Set(this.state.sessions.map(data => data.typology))]
-    const uniqueDays = [... new Set(this.state.sessions.map(data => data.day))]
-    const uniqueRooms = [... new Set(this.state.sessions.map(data => data.room))]
+    const uniqueTracks = [... new Set(this.state.sessions.map(data => data.type))].sort();
+    const uniqueTypology = [... new Set(this.state.sessions.map(data => data.typology))].sort();
+    const uniqueDays = [... new Set(this.state.sessions.map(data => data.day))].sort();
+    const uniqueRooms = [... new Set(this.state.sessions.map(data => data.room))].sort();
 
     const tracks = uniqueTracks.map((el, index) => <option key={el} value={el}>{el}</option>)
     const typologies = uniqueTypology.map((el, index) => <option key={el} value={el}>{el}</option>)
