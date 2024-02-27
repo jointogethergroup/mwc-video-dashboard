@@ -31,11 +31,19 @@ class App extends Component {
     sessions:[],
     sessionSelected:{},
     videosOpen:false,
-    uploadOpen:false
+    uploadOpen:false,
+    loading:false,
+    loading_count:0,
+    loading_total:0,
+    tracks:[],
+    rooms:[],
+    tracks_loaded:false,
+    rooms_loaded:false
   }
 
   componentDidMount(){
     const storedToken = localStorage.getItem('mwc.video.dashboard.token');    
+    
     if (storedToken) {
         const decoded = jwt.decode(storedToken, {complete: true});        
         const exp = decoded.payload.exp;
@@ -45,7 +53,9 @@ class App extends Component {
         this.context.email = decoded.payload.email;
         this.context.event_id = decoded.payload.event_id;
 
-        this.loadSession(1);
+        this.loadRoom(1);
+        this.loadTrack(1);
+        
     }
   }
 
@@ -80,7 +90,8 @@ class App extends Component {
             
             this.setState({loggedIn:true})
 
-            this.loadSession(1);
+            this.loadRoom(1);
+            this.loadTrack(1);
 
 
         }).catch(error => {
@@ -112,32 +123,143 @@ class App extends Component {
       filter_day:"",
       filter_date_from:"",
       filter_date_to:"",
-      sessions:[]
+      sessions:[],
+      tracks:[],
+      rooms:[]
     })
 }
 
-  loadSession = (page) => {
-    
-    /* let data = {
-        headers: {
-            "content-type": "application/json",
-            "Authorization": "ft_0pfl!fqmvyrirz2$wg9du@er"
-        }
-    }; */
+  loadTrack = (page) => {
+      
+    axios.defaults.headers['X-APP-AUTHENTICATE'] = 'rZtp3xI27ByRWaYp6pnT';
 
-    axios.defaults.headers['X-APP-AUTHENTICATE'] = 'D4If9P7muX7gFChbQSKe';
-
-    //axios.get("https://virtual-venue-api-staging.herokuapp.com/api/sessions/me/dashboard/", data)    // get the details of the user
-    //axios.get("https://api.emma.events/v1/programme/json/", data)    // get the lis of programme SESSIONS  FACULTY EMMA
-    
-    axios.get("https://dev-gsma-asm.jemexonline.com/api/sessions/mwcb24?page=" + page)    // get the lis of programme SESSIONS - JEMEX
+    axios.get("https://gsma-asm.jemexonline.com/api/options/mwcb24/track?page=" + page)    // get the lis of programme SESSIONS - JEMEX
         .then(response => {
 
           let next_page = 0;
 
           if (response.data){
 
+              const meta_page = response.data.meta.page * 1;
+              const meta_count = response.data.meta.count * 1;
+              const meta_limit = response.data.meta.limit * 1;
+              const meta_total = response.data.meta.total * 1;
+
+              if (meta_page * meta_limit < meta_total){
+                next_page = meta_page + 1;
+              }
+
+              const program_tracks = [];
+
+              response.data.data.forEach(element => {
+                
+                //if (element.status === 'active'){
+                  const track_new = {
+                    "code": element.code,
+                    "name": element.name,
+                    "ordering": element.ordering
+                  }
+                  program_tracks.push(track_new);  
+                //}
+                
+
+              });
               
+              this.setState({
+                tracks: this.state.tracks.concat(program_tracks), 
+                tracks_loaded: next_page > 0 ? false: true
+              })
+            
+            
+              if  (next_page > 0) {
+                this.loadTrack(next_page);
+              } else {
+                if (this.state.rooms_loaded){
+                  this.loadSession(1);
+                }
+              }
+            
+            }
+
+            
+            
+        })
+        .catch(error => { 
+          console.log(error.message)
+        })
+  }
+
+  loadRoom = (page) => {
+      
+    axios.defaults.headers['X-APP-AUTHENTICATE'] = 'rZtp3xI27ByRWaYp6pnT';
+
+    axios.get("https://gsma-asm.jemexonline.com/api/options/mwcb24/auditorium?page=" + page)    // get the lis of programme SESSIONS - JEMEX
+        .then(response => {
+
+          let next_page = 0;
+
+          if (response.data){
+
+              const meta_page = response.data.meta.page * 1;
+              const meta_count = response.data.meta.count * 1;
+              const meta_limit = response.data.meta.limit * 1;
+              const meta_total = response.data.meta.total * 1;
+
+              if (meta_page * meta_limit < meta_total){
+                next_page = meta_page + 1;
+              }
+
+              const program_rooms = [];
+
+              response.data.data.forEach(element => {
+                
+                //if (element.status === 'active'){
+                  const room_new = {
+                    "code": element.code,
+                    "name": element.name,
+                    "ordering": element.ordering
+                  }
+                  program_rooms.push(room_new);  
+                //}
+                
+
+              });
+              
+              this.setState({
+                rooms: this.state.rooms.concat(program_rooms), 
+                rooms_loaded: next_page > 0 ? false : true
+              })
+            
+              if  (next_page > 0) {
+                this.loadRoom(next_page);
+              } else {
+                if (this.state.tracks_loaded){
+                  this.loadSession(1);
+                }
+              }
+            
+            
+            
+            }
+
+            
+            
+        })
+        .catch(error => { 
+          console.log(error.message)
+        })
+  }
+
+  loadSession = (page) => {
+    
+    axios.defaults.headers['X-APP-AUTHENTICATE'] = 'rZtp3xI27ByRWaYp6pnT';
+    
+    axios.get("https://gsma-asm.jemexonline.com/api/sessions/mwcb24?page=" + page) 
+        .then(response => {
+
+          let next_page = 0;
+
+          if (response.data){
 
               const meta_page = response.data.meta.page * 1;
               const meta_count = response.data.meta.count * 1;
@@ -152,13 +274,24 @@ class App extends Component {
               const scientific_program = [];
               response.data.data.forEach(element => {
                 
+                const room_details = this.state.rooms.find(item => item.code == element.auditorium_id)
+                const track_details = this.state.tracks.find(item => item.code == element.track_id)
+
+                /* if (track_details == null || track_details == undefined){
+                  console.log(element)
+                }
+                if (room_details == null || room_details == undefined){
+                  console.log(element)
+                } */
+
                 const session_new = {
                   "id": element.session_uuid,
                   "title": element.title_en,
-                  "type": element.track_id,
+                  "type_id":element.track_id,
+                  "type": track_details!== null && track_details !== undefined ? track_details.name : "MISSING AUDITORIUM",
                   "typology": element.typology,
                   "room_id": element.auditorium_id,
-                  "room": element.auditorium_id,
+                  "room": room_details !== null && room_details !== undefined ? room_details.name : 'MISSING ROOM',
                   "room_order": element.auditorium_id,
                   "day_id": element.date,
                   "day": element.date,
@@ -174,7 +307,12 @@ class App extends Component {
 
               });
               
-              this.setState({sessions: this.state.sessions.concat(scientific_program)})
+              this.setState({
+                sessions: this.state.sessions.concat(scientific_program), 
+                loading: next_page > 0 ? true : false,
+                loading_count: meta_page * meta_limit > meta_total ? meta_total : meta_page * meta_limit,
+                loading_total: meta_total
+              })
             }
 
             if  (next_page > 0) {
@@ -182,7 +320,10 @@ class App extends Component {
             }
             
         })
-        .catch(error => { console.log(error.message); })
+        .catch(error => { 
+          console.log(error.message); 
+          this.setState({loading: false})
+        })
   }
 
   onFilter = () => {
@@ -275,7 +416,7 @@ class App extends Component {
 
   render() {    
 
-    const uniqueTracks = [... new Set(this.state.sessions.map(data => data.type))].sort();
+    /* const uniqueTracks = [... new Set(this.state.sessions.map(data => data.type))].sort();
     const uniqueTypology = [... new Set(this.state.sessions.map(data => data.typology))].sort();
     const uniqueDays = [... new Set(this.state.sessions.map(data => data.day))].sort();
     const uniqueRooms = [... new Set(this.state.sessions.map(data => data.room))].sort();
@@ -283,11 +424,21 @@ class App extends Component {
     const tracks = uniqueTracks.map((el, index) => <option key={el} value={el}>{el}</option>)
     const typologies = uniqueTypology.map((el, index) => <option key={el} value={el}>{el}</option>)
     const days = uniqueDays.map((el, index) => <option key={el} value={el}>{el}</option>)
-    const rooms = uniqueRooms.map((el, index) => <option key={el} value={el}>{el}</option>)
+    const rooms = uniqueRooms.map((el, index) => <option key={el} value={el}>{el}</option>) */
+    
+    const uniqueTypology = [... new Set(this.state.sessions.map(data => data.typology))].sort();
+    const uniqueDays = [... new Set(this.state.sessions.map(data => data.day))].sort();
+
+    const tracks = this.state.tracks.map((el, index) => <option key={el.code} value={el.code}>{el.name}</option>)
+    const typologies = uniqueTypology.map((el, index) => <option key={el} value={el}>{el}</option>)
+    const days = uniqueDays.map((el, index) => <option key={el} value={el}>{el}</option>)
+    const rooms = this.state.rooms.map((el, index) => <option key={el.code} value={el.code}>{el.name}</option>)
+
+
     const videos =  this.state.sessions
       .filter(el=>el.vimeo_key!==undefined)
       .filter(el=>el.title.toUpperCase().includes(this.state.filter_title.toUpperCase()) || this.state.filter_title === "" || this.state.filter_title === null || this.state.filter_title === undefined)
-      .filter(el=>el.type === this.state.filter_track || this.state.filter_track === null || this.state.filter_track === undefined || this.state.filter_track === "")
+      .filter(el=>el.type_id === this.state.filter_track || this.state.filter_track === null || this.state.filter_track === undefined || this.state.filter_track === "")
       .filter(el=>el.typology === this.state.filter_typology 
         || ( this.state.filter_typology === "non-physical" && el.typology === "Hybrid") 
         || ( this.state.filter_typology === "non-physical" && el.typology === "Virtual") 
@@ -296,7 +447,7 @@ class App extends Component {
         || this.state.filter_typology === ""
         )
       .filter(el=>el.day === this.state.filter_day || this.state.filter_day === null || this.state.filter_day === undefined || this.state.filter_day === "")
-      .filter(el=>el.room === this.state.filter_room || this.state.filter_room === null || this.state.filter_room === undefined || this.state.filter_room === "")
+      .filter(el=>el.room_id === this.state.filter_room || this.state.filter_room === null || this.state.filter_room === undefined || this.state.filter_room === "")
       .filter((el, index) => {
         const start = el.time_start.replace(/T/g, ' ').replace(/Z/g, '')  
         const start_date =  new Date(start);
@@ -485,9 +636,12 @@ class App extends Component {
 
                   </div>
               </div>
+
               <div className="content-mwc-videos-area">
                   <div className="content-mwc-videos-area-wrapper">
-                    {videos}
+                  {this.state.loading ?
+                    <div><p>LOADING SESSIONS .... {this.state.loading_count} / {this.state.loading_total}</p></div>
+                    : videos}
                   </div>
               </div>
             
